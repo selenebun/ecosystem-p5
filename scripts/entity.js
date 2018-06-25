@@ -78,6 +78,7 @@ class Entity {
 
     // Display entity
     display() {
+        this.color.setAlpha(this.hunger / this.maxHunger * 215 + 40);
         this.model();
 
         // Display perception range
