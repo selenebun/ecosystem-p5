@@ -19,6 +19,9 @@ function setup() {
 function draw() {
     background(0);
 
+    // Spawn food
+    spawnFood(0.2);
+
     // Update and display all entities
     for (let i = entities.length - 1; i >= 0; i--) {
         let e = entities[i];
@@ -30,6 +33,10 @@ function draw() {
             e.onDeath();
         }
     }
+
+    // Add new entities
+    entities = entities.concat(newEntities);
+    newEntities = [];
 }
 
 
@@ -44,5 +51,15 @@ function reset() {
         applyTemplate(e, random() < 0.5 ? ENTITY.prey : ENTITY.food);
         e.init();
         entities.push(e);
+    }
+}
+
+// Spawn food on screen
+function spawnFood(chance) {
+    if (random() < chance) {
+        let e = new Entity(random(width), random(height));
+        applyTemplate(e, ENTITY.food);
+        e.init();
+        newEntities.push(e);
     }
 }

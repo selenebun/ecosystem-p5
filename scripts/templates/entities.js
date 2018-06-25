@@ -24,5 +24,9 @@ ENTITY.prey = {
     // Misc
     type: 'prey',
     // Physcis
-    r: 8
+    r: 8,
+    // Methods
+    onEat: function() {
+        this.reproduce();
+    }
 };

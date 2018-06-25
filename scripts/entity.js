@@ -15,6 +15,7 @@ class Entity {
 
         // Misc
         this.canStarve = true;
+        this.children = 2;
         this.dead = false;
         this.hunger = 200;
         this.type = 'entity';
@@ -69,6 +70,9 @@ class Entity {
                 // Add hunger levels
                 this.hunger += e.hunger;
                 if (this.hunger > this.maxHunger) this.hunger = this.maxHunger;
+
+                // Trigger onEat event
+                this.onEat();
             }
         }
     }
@@ -167,11 +171,39 @@ class Entity {
 
     // Events
     onDeath() {}
+    onEat() {}
+
+    // Spawn new child entities
+    reproduce() {
+        for (let i = 0; i < this.children; i++) {
+            this.spawnChild();
+        }
+    }
 
     // Seek towards a target vector
     seek(v) {
         let desired = p5.Vector.sub(v, this.pos);
         return this.adjust(desired);
+    }
+
+    // Spawn a new child entity, apply mutations
+    spawnChild() {
+        let e = new Entity(this.pos.x, this.pos.y);
+        applyTemplate(e, ENTITY[this.type]);
+
+        // Apply mutations
+        e.perception = mutate(this.perception, 10);
+        e.priorityFlee = mutate(this.priorityFlee, 0.1);
+        e.prioritySeek = mutate(this.prioritySeek, 0.1);
+
+        e.hunger = mutate(this.hunger, 10);
+
+        e.r = mutate(this.r, 1);
+        e.maxForce = mutate(this.maxForce, 0.01);
+        e.maxSpeed = mutate(this.maxSpeed, 0.1);
+
+        e.init();
+        newEntities.push(e);
     }
 
     // Apply steering behaviors
