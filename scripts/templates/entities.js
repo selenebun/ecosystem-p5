@@ -16,6 +16,7 @@ ENTITY.food = {
 
 ENTITY.prey = {
     // AI
+    toEat: ['food'],
     toSeek: ['food'],
     // Display
     color: '#22A7F0',

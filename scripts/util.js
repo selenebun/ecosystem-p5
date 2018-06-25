@@ -16,3 +16,8 @@ function circleCircle(c1, r1, c2, r2) {
 function pointCircle(p, c, r) {
     return p.dist(c) < r;
 }
+
+// Remove duplicate entries from array
+function uniq(arr) {
+    return Array.from(new Set(arr));
+}

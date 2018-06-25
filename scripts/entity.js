@@ -2,9 +2,11 @@ class Entity {
     constructor(x, y) {
         // AI
         this.perception = 100;
+        this.priorityFlee = 1;
         this.prioritySeek = 1;
         //this.toArrive = [];
-        //this.toEat = [];
+        this.toEat = [];
+        this.toFlee = [];
         this.toSeek = [];
 
         // Display
@@ -28,10 +30,15 @@ class Entity {
 
     // All operations to do every tick
     act(entities) {
-        this.steer(entities);
+        // Get all visible entities
+        let relevant = this.getVisible(entities, this.rTypes);
+        this.steer(relevant);
         this.update();
-        this.borders();
-        this.display();
+        if (!this.dead) {
+            this.borders();
+            this.attemptEat(relevant);
+            this.display();
+        }
     }
 
     // Adjust steering
@@ -47,6 +54,25 @@ class Entity {
         this.acc.add(f);
     }
 
+    // Attempt to eat
+    attemptEat(entities) {
+        for (let i = 0; i < entities.length; i++) {
+            let e = entities[i];
+
+            // Check if can eat
+            if (this.toEat.indexOf(e.type) === -1) continue;
+
+            // Eat if inside entity
+            if (!e.dead && pointCircle(e.pos, this.pos, this.r)) {
+                e.dead = true;
+
+                // Add hunger levels
+                this.hunger += e.hunger;
+                if (this.hunger > this.maxHunger) this.hunger = this.maxHunger;
+            }
+        }
+    }
+
     // Behavior around map edges
     borders() {}
 
@@ -54,12 +80,25 @@ class Entity {
     display() {
         this.model();
 
+        // Display perception range
+        if (keyIsDown(80)) {
+            noFill();
+            stroke('#39D5FF');
+            ellipse(this.pos.x, this.pos.y, this.perception, this.perception);
+        }
+
         // Display hitbox
         if (keyIsDown(72)) {
             fill(255, 63);
             stroke(255);
             ellipse(this.pos.x, this.pos.y, this.r, this.r);
         }
+    }
+
+    // Flee from a target vector
+    flee(v) {
+        let desired = p5.Vector.sub(this.pos, v);
+        return this.adjust(desired);
     }
 
     // Return the nearest entity
@@ -79,7 +118,7 @@ class Entity {
             if (types.indexOf(e.type) === -1) continue;
 
             // Do not consider entities beyond perception range
-            if (circleCircle(this.pos, this.perception, e.pos, e.r)) continue;
+            if (!circleCircle(this.pos, this.perception, e.pos, e.r)) continue;
 
             // Compare distance to best distance
             let dist = e.pos.dist(this.pos);
@@ -116,11 +155,13 @@ class Entity {
         return results;
     }
 
-
     // Any dynamic initializations to do
     init() {
         this.color = color(this.color);
         this.maxHunger = this.hunger;
+
+        // All types that the entity reacts to
+        this.rTypes = uniq(this.toEat.concat(this.toFlee, this.toSeek));
     }
 
     // Events
@@ -133,16 +174,27 @@ class Entity {
     }
 
     // Apply steering behaviors
-    steer(entities) {
+    steer(arr) {
+        // Wander if no relevant entities in perception range
+        if (arr.length === 0) {
+            this.applyForce(this.wander());
+            return;
+        }
+
+        // Fleeing
+        let toFlee = this.getNearest(arr, this.toFlee);
+        if (toFlee) {
+            let flee = this.flee(toFlee.pos);
+            flee.mult(this.priorityFlee);
+            this.applyForce(flee);
+        }
+
         // Seeking
-        let target = this.getNearest(entities, this.toSeek);
-        if (target) {
-            let seek = this.seek(target.pos);
+        let toSeek = this.getNearest(arr, this.toSeek);
+        if (toSeek) {
+            let seek = this.seek(toSeek.pos);
             seek.mult(this.prioritySeek);
             this.applyForce(seek);
-        } else {
-            let wander = this.wander();
-            this.applyForce(wander);
         }
     }
 

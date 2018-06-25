@@ -22,7 +22,7 @@ function draw() {
     // Update and display all entities
     for (let i = entities.length - 1; i >= 0; i--) {
         let e = entities[i];
-        e.act(entities);
+        if (!e.dead) e.act(entities);
 
         // Remove if dead
         if (e.dead) {
