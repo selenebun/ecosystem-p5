@@ -22,7 +22,7 @@ function draw() {
     // Update and display all entities
     for (let i = entities.length - 1; i >= 0; i--) {
         let e = entities[i];
-        e.act();
+        e.act(entities);
 
         // Remove if dead
         if (e.dead) {
@@ -42,6 +42,7 @@ function reset() {
     for (let i = 0; i < 100; i++) {
         let e = new Entity(random(width), random(height));
         applyTemplate(e, random() < 0.5 ? ENTITY.prey : ENTITY.food);
+        e.init();
         entities.push(e);
     }
 }

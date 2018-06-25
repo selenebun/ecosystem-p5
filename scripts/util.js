@@ -6,3 +6,13 @@ function applyTemplate(obj, template) {
         obj[key] = template[key];
     }
 }
+
+// Circle-circle collision detection
+function circleCircle(c1, r1, c2, r2) {
+    return c1.dist(c2) < r1 + r2;
+}
+
+// Point-circle collision detection
+function pointCircle(p, c, r) {
+    return p.dist(c) < r;
+}
