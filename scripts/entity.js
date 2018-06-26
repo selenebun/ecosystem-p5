@@ -15,7 +15,8 @@ class Entity {
 
         // Misc
         this.canStarve = true;
-        this.children = 2;
+        this.childrenBase = 1;
+        this.childrenExtra = 1;
         this.dead = false;
         this.hunger = 200;
         this.type = 'entity';
@@ -82,8 +83,9 @@ class Entity {
 
     // Display entity
     display() {
-        this.color.setAlpha(this.hunger / this.maxHunger * 215 + 40);
-        this.model();
+        let alpha = this.hunger / this.maxHunger * 215 + 40;
+        this.color.setAlpha(alpha);
+        this.model(alpha);
 
         // Display perception range
         if (keyIsDown(80)) {
@@ -175,7 +177,14 @@ class Entity {
 
     // Spawn new child entities
     reproduce() {
-        for (let i = 0; i < this.children; i++) {
+        // Determine number of children to spawn
+        let count = this.childrenBase;
+        for (let i = 0; i < this.childrenExtra; i++) {
+            if (random() < 0.5) count++;
+        }
+
+        // Spawn and mutate children
+        for (let i = 0; i < count; i++) {
             this.spawnChild();
         }
     }
