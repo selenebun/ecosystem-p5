@@ -6,6 +6,12 @@ MODEL.circle = function(alpha) {
     ellipse(this.pos.x, this.pos.y, this.r, this.r);
 };
 
+MODEL.filledCircle = function(alpha) {
+    fill(0, alpha);
+    stroke(this.color);
+    ellipse(this.pos.x, this.pos.y, this.r, this.r);
+};
+
 MODEL.pointy = function(alpha) {
     push();
     translate(this.pos.x, this.pos.y);

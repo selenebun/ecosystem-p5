@@ -16,14 +16,14 @@ ENTITY.food = {
 
 ENTITY.prey = {
     // AI
-    priorityFlee: 0,
+    priorityFlee: 0.2,
     toEat: ['food'],
     toFlee: ['predator'],
     toSeek: ['food'],
     toSeparate: ['prey'],
     // Display
     color: '#22A7F0',
-    model: MODEL.pointy,
+    model: MODEL.filledCircle,
     // Misc
     childrenExtra: 1,
     type: 'prey',

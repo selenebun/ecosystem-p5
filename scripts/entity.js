@@ -247,6 +247,13 @@ class Entity {
         applyTemplate(e, ENTITY[this.type]);
 
         // Apply mutations
+        let c = color(this.color.toString());
+        let levels = c.levels;
+        c.setRed(mutate(levels[0], 10));
+        c.setGreen(mutate(levels[1], 10));
+        c.setBlue(mutate(levels[2], 10));
+        e.color = c;
+
         e.perception = mutate(this.perception, 10);
         e.priorityArrive = mutate(this.priortiyArrive, 0.1);
         e.priorityFlee = mutate(this.priorityFlee, 0.1);
