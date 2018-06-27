@@ -1,7 +1,7 @@
 class Entity {
     constructor(x, y) {
         // AI
-        this.perception = 50;
+        this.perception = 75;
         this.priorityArrive = 1;
         this.priorityCohesion = 1;
         this.priorityFlee = 1;
@@ -42,9 +42,9 @@ class Entity {
         // Get all visible entities
         let relevant = this.getVisible(arr, this.rTypes);
         this.steer(relevant);
+        this.borders();
         this.update();
         if (!this.dead) {
-            this.borders();
             this.attemptEat(relevant);
             this.display();
         }
@@ -100,7 +100,17 @@ class Entity {
     }
 
     // Behavior around map edges
-    borders() {}
+    borders() {
+        let sep = 50;
+        let desired = this.vel.copy();
+
+        if (this.pos.x < sep) desired.x = this.maxSpeed;
+        if (this.pos.x > width - sep) desired.x = -this.maxSpeed;
+        if (this.pos.y < sep) desired.y = this.maxSpeed;
+        if (this.pos.y > height - sep) desired.y = -this.maxSpeed;
+
+        this.applyForce(this.adjust(desired));
+    }
 
     // Steer towards nearby entities
     cohere(arr) {
@@ -216,6 +226,9 @@ class Entity {
 
         // All types that the entity reacts to
         this.rTypes = uniq(this.toArrive.concat(this.toCohere, this.toEat, this.toFlee, this.toSeek, this.toSeparate));
+
+        // Wander angle
+        this.wanderTheta = this.vel.heading();
     }
 
     // Events
@@ -379,6 +392,7 @@ class Entity {
 
     // Accelerate in a random direction
     wander() {
-        return p5.Vector.fromAngle(random(TWO_PI), this.maxForce);
+        this.wanderTheta += random(-1, 1);
+        return p5.Vector.fromAngle(this.wanderTheta, this.maxForce);
     }
 }
