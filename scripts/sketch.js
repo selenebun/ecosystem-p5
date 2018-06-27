@@ -1,6 +1,15 @@
 let entities;
 let newEntities;
 
+let presets = [
+    {
+        food: 30,
+        prey: 20,
+        predator: 0
+    }
+];
+let selectedPreset = 0;
+
 
 function setup() {
     // Set up canvas
@@ -45,12 +54,18 @@ function reset() {
     entities = [];
     newEntities = [];
 
-    // Spawn example entities
-    for (let i = 0; i < 100; i++) {
-        let e = new Entity(random(width), random(height));
-        applyTemplate(e, random() < 0.5 ? ENTITY.prey : ENTITY.food);
-        e.init();
-        entities.push(e);
+    // Spawn entities from preset
+    let preset = presets[selectedPreset];
+    let keys = Object.keys(preset);
+    for (let i = 0; i < keys.length; i++) {
+        let template = keys[i];
+        let count = preset[template];
+        for (let j = 0; j < count; j++) {
+            let e = new Entity(random(width), random(height));
+            applyTemplate(e, ENTITY[template]);
+            e.init();
+            entities.push(e);
+        }
     }
 }
 
