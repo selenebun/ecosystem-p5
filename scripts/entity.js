@@ -2,9 +2,10 @@ class Entity {
     constructor(x, y) {
         // AI
         this.perception = 100;
+        this.priorityArrive = 1;
         this.priorityFlee = 1;
         this.prioritySeek = 1;
-        //this.toArrive = [];
+        this.toArrive = [];
         this.toEat = [];
         this.toFlee = [];
         this.toSeek = [];
@@ -16,7 +17,7 @@ class Entity {
         // Misc
         this.canStarve = true;
         this.childrenBase = 1;
-        this.childrenExtra = 1;
+        this.childrenExtra = 0;
         this.dead = false;
         this.hunger = 200;
         this.type = 'entity';
@@ -44,8 +45,8 @@ class Entity {
     }
 
     // Adjust steering
-    adjust(steer) {
-        steer.setMag(this.maxSpeed);
+    adjust(steer, speed) {
+        steer.setMag(typeof speed === 'undefined' ? this.maxSpeed : speed);
         steer.sub(this.vel);
         steer.limit(this.maxForce);
         return steer;
@@ -54,6 +55,20 @@ class Entity {
     // Apply a force
     applyForce(f) {
         this.acc.add(f);
+    }
+
+    // Slow down in order to arrive at a target vector
+    arrive(v) {
+        let desired = p5.Vector.sub(v, this.pos);
+        let d = desired.mag();
+
+        // Slow down if nearby target
+        if (d < 100) {
+            let speed = map(d, 0, 100, 0, this.maxSpeed);
+            return this.adjust(desired, speed);
+        } else {
+            return this.adjust(desired);
+        }
     }
 
     // Attempt to eat
@@ -221,6 +236,14 @@ class Entity {
         if (arr.length === 0) {
             this.applyForce(this.wander());
             return;
+        }
+
+        // Arriving
+        let toArrive = this.getNearest(arr, this.toArrive);
+        if (toArrive) {
+            let arrive = this.arrive(toArrive.pos);
+            arrive.mult(this.priorityArrive);
+            this.applyForce(arrive);
         }
 
         // Fleeing
