@@ -73,8 +73,8 @@ function keyPressed() {
 
     // Entity selection
     if (key === 'F') selected = 'food';
-    if (key === 'P') selected = 'prey';
-    if (key === 'B') selected = 'predator';
+    if (key === 'B') selected = 'prey';
+    if (key === 'P') selected = 'predator';
 }
 
 function mouseDragged() {
