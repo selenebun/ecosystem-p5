@@ -264,7 +264,7 @@ class Entity {
                         let e = toAvoid[i];
                         let d = e.pos.dist(this.pos);
                         let diff = p5.Vector.sub(this.pos, e.pos);
-                        diff.setMag(1 / d);
+                        diff.setMag(1 / max(d, 0.01));
                         avoidVector.add(diff);
                     }
                     avoidVector.div(toAvoid.length);
