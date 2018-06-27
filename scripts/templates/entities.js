@@ -50,7 +50,7 @@ ENTITY.predator = {
     model: MODEL.pointy,
     // Misc
     hunger: 150,
-    foodDropChance: 0.5,
+    foodDropChance: 0.1,
     reproduceChance: 0.1,
     type: 'predator',
     // Physics
