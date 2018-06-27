@@ -22,9 +22,29 @@ ENTITY.prey = {
     color: '#22A7F0',
     model: MODEL.pointy,
     // Misc
+    childrenExtra: 1,
     type: 'prey',
-    // Physcis
+    // Physics
     r: 8,
+    // Methods
+    onEat: function() {
+        this.reproduce();
+    }
+};
+
+ENTITY.predator = {
+    // AI
+    perception: 150,
+    toEat: ['prey'],
+    toSeek: ['prey'],
+    // Display
+    color: '#D73C2C',
+    model: MODEL.pointy,
+    // Misc
+    hunger: 100,
+    type: 'predator',
+    // Physics
+    r: 12,
     // Methods
     onEat: function() {
         this.reproduce();
