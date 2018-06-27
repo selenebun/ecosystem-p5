@@ -239,8 +239,10 @@ class Entity {
     reproduce() {
         // Determine number of children to spawn
         let count = round(this.childrenBase);
-        for (let i = 0; i < round(this.childrenExtra); i++) {
-            if (random() < 0.5) count++;
+        if (entities.length + newEntities.length < 600) {
+            for (let i = 0; i < round(this.childrenExtra); i++) {
+                if (random() < 0.5) count++;
+            }
         }
 
         // Spawn and mutate children
