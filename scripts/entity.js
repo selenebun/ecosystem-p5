@@ -39,15 +39,15 @@ class Entity {
 
     // All operations to do every tick
     act(arr) {
-        // Get all visible entities
-        let relevant = this.getVisible(arr, this.rTypes);
-        this.steer(relevant);
-        this.borders();
-        this.update();
-        if (!this.dead) {
+        if (!paused) {
+            // Get all visible entities
+            let relevant = this.getVisible(arr, this.rTypes);
+            this.steer(relevant);
+            this.borders();
+            this.update();
             this.attemptEat(relevant);
-            this.display();
         }
+        this.display();
     }
 
     // Adjust steering

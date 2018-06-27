@@ -11,6 +11,7 @@ let presets = [
 ];
 let selectedPreset = 0;
 
+let paused = false;
 let selected = 'prey';
 
 
@@ -32,7 +33,7 @@ function draw() {
     background(0);
 
     // Spawn food
-    if (!toLimitEntities() && random() < 0.2) {
+    if (!paused && !toLimitEntities() && random() < 0.2) {
         spawnEntity(random(width), random(height), 'food');
     }
 
@@ -49,8 +50,10 @@ function draw() {
     }
 
     // Add new entities
-    entities = entities.concat(newEntities);
-    newEntities = [];
+    if (!paused) {
+        entities = entities.concat(newEntities);
+        newEntities = [];
+    }
 }
 
 function keyPressed() {
@@ -61,6 +64,9 @@ function keyPressed() {
         if (n < presets.length) selectedPreset = n;
         reset();
     }
+
+    // Toggle pause state
+    if (key === ' ') paused = !paused;
 
     // Reset simulation
     if (key === 'R') reset();
