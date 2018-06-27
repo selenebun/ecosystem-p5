@@ -12,6 +12,18 @@ function circleCircle(c1, r1, c2, r2) {
     return c1.dist(c2) < r1 + r2;
 }
 
+// Return an array of entities matching types
+function getByType(entities, types) {
+    let results = [];
+    if (typeof types === 'undefined') types = [];
+    for (let i = 0; i < entities.length; i++) {
+        let e = entities[i];
+        if (types.indexOf(e.type) > -1) results.push(e);
+    }
+
+    return results;
+}
+
 // Mutate a value, ensure it does not go below 0
 function mutate(val, amt) {
     return max(val + random(-amt, amt), 0);

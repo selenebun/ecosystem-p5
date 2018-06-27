@@ -5,10 +5,13 @@ class Entity {
         this.priorityArrive = 1;
         this.priorityFlee = 1;
         this.prioritySeek = 1;
+        this.prioritySeparation = 1;
+        this.separationDist = 25;
         this.toArrive = [];
         this.toEat = [];
         this.toFlee = [];
         this.toSeek = [];
+        this.toSeparate = [];
 
         // Display
         this.color = '#ECF0F1';
@@ -32,9 +35,9 @@ class Entity {
     }
 
     // All operations to do every tick
-    act(entities) {
+    act(arr) {
         // Get all visible entities
-        let relevant = this.getVisible(entities, this.rTypes);
+        let relevant = this.getVisible(arr, this.rTypes);
         this.steer(relevant);
         this.update();
         if (!this.dead) {
@@ -72,9 +75,9 @@ class Entity {
     }
 
     // Attempt to eat
-    attemptEat(entities) {
-        for (let i = 0; i < entities.length; i++) {
-            let e = entities[i];
+    attemptEat(arr) {
+        for (let i = 0; i < arr.length; i++) {
+            let e = arr[i];
 
             // Check if can eat
             if (this.toEat.indexOf(e.type) === -1) continue;
@@ -210,6 +213,34 @@ class Entity {
         return this.adjust(desired);
     }
 
+    // Maintain a minimum distance from nearby entities
+    separate(arr) {
+        let desired = createVector();
+
+        // Account for all nearby entities
+        let count = 0;
+        for (let i = 0; i < arr.length; i++) {
+            let e = arr[i];
+            let d = e.pos.dist(this.pos);
+
+            // Check if within separation range
+            if (d < this.separationDist) {
+                let diff = p5.Vector.sub(this.pos, b.pos);
+                diff.setMag(1 / d);
+                desired.add(diff);
+                count++;
+            }
+        }
+
+        // Average
+        if (count > 0) desired.div(count);
+
+        // If desired velocity is nonzero
+        if (desired.magSq() > 0) desired = this.adjust(desired);
+
+        return desired;
+    }
+
     // Spawn a new child entity, apply mutations
     spawnChild() {
         let e = new Entity(this.pos.x, this.pos.y);
@@ -217,8 +248,11 @@ class Entity {
 
         // Apply mutations
         e.perception = mutate(this.perception, 10);
+        e.priorityArrive = mutate(this.priortiyArrive, 0.1);
         e.priorityFlee = mutate(this.priorityFlee, 0.1);
         e.prioritySeek = mutate(this.prioritySeek, 0.1);
+        e.prioritySeparate = mutate(this.prioritySeparate, 0.1);
+        e.separationDist = mutate(this.separationDist, 1);
 
         e.hunger = mutate(this.hunger, 10);
 
@@ -261,6 +295,12 @@ class Entity {
             seek.mult(this.prioritySeek);
             this.applyForce(seek);
         }
+
+        // Separation
+        let toSeparate = getByType(arr, this.toSeparate);
+        let separate = this.separate(toSeparate);
+        separate.mult(this.prioritySeparate);
+        this.applyForce(separate);
     }
 
     // Update physics and hunger

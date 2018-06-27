@@ -5,7 +5,7 @@ let presets = [
     {
         food: 30,
         prey: 20,
-        predator: 0
+        predator: 10
     }
 ];
 let selectedPreset = 0;
