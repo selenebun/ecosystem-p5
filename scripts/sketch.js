@@ -48,6 +48,19 @@ function draw() {
     newEntities = [];
 }
 
+function keyPressed() {
+    // Change preset
+    let n = parseInt(key);
+    if (n) {
+        n--;
+        if (n < presets.length) selectedPreset = n;
+        reset();
+    }
+
+    // Reset simulation
+    if (key === 'R') reset();
+}
+
 
 // Reset entities
 function reset() {
