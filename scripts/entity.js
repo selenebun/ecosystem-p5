@@ -71,9 +71,8 @@ class Entity {
             if (!e.dead && pointCircle(e.pos, this.pos, this.r)) {
                 e.dead = true;
 
-                // Add hunger levels
-                this.hunger += e.hunger;
-                if (this.hunger > this.maxHunger) this.hunger = this.maxHunger;
+                // Refill hunger
+                this.hunger = this.maxHunger;
 
                 // Trigger onEat event
                 this.onEat();

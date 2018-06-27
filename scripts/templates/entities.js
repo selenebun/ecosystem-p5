@@ -27,7 +27,7 @@ ENTITY.prey = {
     // Misc
     childrenExtra: 1,
     foodDropChance: 0,
-    hunger: 300,
+    hunger: 100,
     reproduceChance: 0.8,
     type: 'prey',
     // Physics
@@ -49,8 +49,8 @@ ENTITY.predator = {
     color: '#D73C2C',
     model: MODEL.pointy,
     // Misc
-    hunger: 200,
-    foodDropChance: 0,
+    hunger: 150,
+    foodDropChance: 0.5,
     reproduceChance: 0.1,
     type: 'predator',
     // Physics
