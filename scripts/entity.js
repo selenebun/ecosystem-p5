@@ -19,7 +19,9 @@ class Entity {
         this.childrenBase = 1;
         this.childrenExtra = 0;
         this.dead = false;
+        this.foodDropChance = 0.5;
         this.hunger = 50;
+        this.reproduceChance = 1;
         this.type = 'entity';
 
         // Physics
@@ -181,8 +183,14 @@ class Entity {
     }
 
     // Events
-    onDeath() {}
-    onEat() {}
+    onDeath() {
+        if (random() < this.foodDropChance) {
+            spawnEntity(this.pos.x, this.pos.y, 'food');
+        }
+    }
+    onEat() {
+        if (random() < this.reproduceChance) this.reproduce();
+    }
 
     // Spawn new child entities
     reproduce() {
@@ -228,6 +236,7 @@ class Entity {
         e.childrenBase = mutate(this.childrenBase, 0.1);
         e.childrenExtra = mutate(this.childrenExtra, 0.1);
         e.hunger = mutate(this.hunger, 10);
+        e.reproduceChance = mutate(this.reproduceChance, 0.01, 1);
 
         e.r = mutate(this.r, 1);
         e.maxForce = mutate(this.maxForce, 0.01);

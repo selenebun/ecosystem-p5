@@ -7,6 +7,7 @@ ENTITY.food = {
     color: '#2ECC71',
     // Misc
     canStarve: false,
+    foodDropChance: 0,
     type: 'food',
     // Physics
     r: 4,
@@ -16,7 +17,7 @@ ENTITY.food = {
 
 ENTITY.prey = {
     // AI
-    priorityAvoid: 0.2,
+    priorityAvoid: 0.1,
     toEat: ['food'],
     toAvoid: ['predator'],
     toPursue: ['food'],
@@ -25,23 +26,22 @@ ENTITY.prey = {
     model: MODEL.filledCircle,
     // Misc
     childrenExtra: 1,
-    hunger: 200,
+    foodDropChance: 0,
+    hunger: 300,
+    reproduceChance: 0.8,
     type: 'prey',
     // Physics
     maxForce: 0.2,
     maxSpeed: 3,
-    r: 8,
-    // Methods
-    onEat: function() {
-        this.reproduce();
-    }
+    r: 8
 };
 
 ENTITY.predator = {
     // AI
     multiplePursue: true,
     perception: 150,
-    priorityAvoid: 0.125,
+    priorityAvoid: 0.25,
+    priorityPursue: 2,
     toAvoid: ['predator'],
     toEat: ['prey'],
     toPursue: ['prey'],
@@ -49,16 +49,10 @@ ENTITY.predator = {
     color: '#D73C2C',
     model: MODEL.pointy,
     // Misc
-    hunger: 100,
+    hunger: 200,
+    foodDropChance: 0,
+    reproduceChance: 0.1,
     type: 'predator',
     // Physics
-    r: 12,
-    // Methods
-    onDeath: function() {
-        if (random() < 0.5) return;
-        spawnEntity(this.pos.x, this.pos.y, 'food');
-    },
-    onEat: function() {
-        this.reproduce();
-    }
+    r: 12
 };

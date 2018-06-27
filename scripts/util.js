@@ -25,8 +25,10 @@ function getByType(entities, types) {
 }
 
 // Mutate a value, ensure it does not go below 0
-function mutate(val, amt) {
-    return max(val + random(-amt, amt), 0);
+function mutate(val, amt, limit) {
+    let num = max(val + random(-amt, amt), 0);
+    if (typeof limit !== 'undefined') num = min(num, limit);
+    return num;
 }
 
 // Point-circle collision detection

@@ -33,7 +33,7 @@ function draw() {
     background(0);
 
     // Spawn food
-    if (!paused && !toLimitEntities() && random() < 0.2) {
+    if (!paused && !toLimitEntities() && random() < 0.5) {
         spawnEntity(random(width), random(height), 'food');
     }
 
