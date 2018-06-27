@@ -88,7 +88,7 @@ function mousePressed() {
 
 // Return whether entity count is high enough to begin slowdown
 function toLimitEntities() {
-    return entities.length + newEntities.length > 600;
+    return entities.length + newEntities.length >= 600;
 }
 
 // Reset entities
