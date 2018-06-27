@@ -20,7 +20,6 @@ ENTITY.prey = {
     toEat: ['food'],
     toFlee: ['predator'],
     toSeek: ['food'],
-    toSeparate: ['prey'],
     // Display
     color: '#22A7F0',
     model: MODEL.filledCircle,
@@ -38,10 +37,8 @@ ENTITY.prey = {
 ENTITY.predator = {
     // AI
     perception: 150,
-    prioritySeparation: 0,
     toEat: ['prey'],
     toSeek: ['prey'],
-    toSeparate: ['predator'],
     // Display
     color: '#D73C2C',
     model: MODEL.pointy,

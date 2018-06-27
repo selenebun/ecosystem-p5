@@ -1,13 +1,16 @@
 class Entity {
     constructor(x, y) {
         // AI
-        this.perception = 100;
+        this.perception = 50;
         this.priorityArrive = 1;
+        this.priorityCohesion = 1;
         this.priorityFlee = 1;
         this.prioritySeek = 1;
         this.prioritySeparation = 1;
-        this.separationDist = 25;
+        this.rangeCohesion = 50;
+        this.rangeSeparation = 25;
         this.toArrive = [];
+        this.toCohere = [];
         this.toEat = [];
         this.toFlee = [];
         this.toSeek = [];
@@ -99,6 +102,32 @@ class Entity {
     // Behavior around map edges
     borders() {}
 
+    // Steer towards nearby entities
+    cohere(arr) {
+        let desired = createVector();
+
+        // Account for all nearby entities
+        let count = 0;
+        for (let i = 0; i < arr.length; i++) {
+            let e = arr[i];
+            let d = e.pos.dist(this.pos);
+
+            // Check if within cohesion range
+            if (d < this.rangeCohesion) {
+                desired.add(e.pos);
+                count++;
+            }
+        }
+
+        // Average
+        if (count > 0) {
+            desired.div(count);
+            desired = this.seek(desired);
+        }
+
+        return desired;
+    }
+
     // Display entity
     display() {
         let alpha = this.hunger / this.maxHunger * 215 + 40;
@@ -186,7 +215,7 @@ class Entity {
         this.maxHunger = this.hunger;
 
         // All types that the entity reacts to
-        this.rTypes = uniq(this.toEat.concat(this.toFlee, this.toSeek));
+        this.rTypes = uniq(this.toArrive.concat(this.toCohere, this.toEat, this.toFlee, this.toSeek, this.toSeparate));
     }
 
     // Events
@@ -196,8 +225,8 @@ class Entity {
     // Spawn new child entities
     reproduce() {
         // Determine number of children to spawn
-        let count = this.childrenBase;
-        for (let i = 0; i < this.childrenExtra; i++) {
+        let count = round(this.childrenBase);
+        for (let i = 0; i < round(this.childrenExtra); i++) {
             if (random() < 0.5) count++;
         }
 
@@ -224,8 +253,8 @@ class Entity {
             let d = e.pos.dist(this.pos);
 
             // Check if within separation range
-            if (d < this.separationDist) {
-                let diff = p5.Vector.sub(this.pos, b.pos);
+            if (d < this.rangeSeparation) {
+                let diff = p5.Vector.sub(this.pos, e.pos);
                 diff.setMag(1 / d);
                 desired.add(diff);
                 count++;
@@ -256,11 +285,15 @@ class Entity {
 
         e.perception = mutate(this.perception, 10);
         e.priorityArrive = mutate(this.priortiyArrive, 0.1);
+        e.priorityCohesion = mutate(this.priorityCohesion, 0.1);
         e.priorityFlee = mutate(this.priorityFlee, 0.1);
         e.prioritySeek = mutate(this.prioritySeek, 0.1);
         e.prioritySeparate = mutate(this.prioritySeparate, 0.1);
-        e.separationDist = mutate(this.separationDist, 1);
+        e.rangeCohesion = mutate(this.rangeCohesion, 10);
+        e.rangeSeparation = mutate(this.rangeSeparation, 10);
 
+        e.childrenBase = mutate(this.childrenBase, 0.1);
+        e.childrenExtra = mutate(this.childrenExtra, 0.1);
         e.hunger = mutate(this.hunger, 10);
 
         e.r = mutate(this.r, 1);
@@ -280,34 +313,50 @@ class Entity {
         }
 
         // Arriving
-        let toArrive = this.getNearest(arr, this.toArrive);
-        if (toArrive) {
-            let arrive = this.arrive(toArrive.pos);
-            arrive.mult(this.priorityArrive);
-            this.applyForce(arrive);
+        if (this.priorityArrive > 0 && this.toArrive.length > 0) {
+            let toArrive = this.getNearest(arr, this.toArrive);
+            if (toArrive) {
+                let arrive = this.arrive(toArrive.pos);
+                arrive.mult(this.priorityArrive);
+                this.applyForce(arrive);
+            }
+        }
+
+        // Cohesion
+        if (this.priorityCohesion > 0 && this.toCohere.length > 0) {
+            let toCohere = getByType(arr, this.toCohere);
+            let cohesion = this.cohere(toCohere);
+            cohesion.mult(this.priorityCohesion);
+            this.applyForce(cohesion);
         }
 
         // Fleeing
-        let toFlee = this.getNearest(arr, this.toFlee);
-        if (toFlee) {
-            let flee = this.flee(toFlee.pos);
-            flee.mult(this.priorityFlee);
-            this.applyForce(flee);
+        if (this.priorityFlee > 0 && this.toFlee.length > 0) {
+            let toFlee = this.getNearest(arr, this.toFlee);
+            if (toFlee) {
+                let flee = this.flee(toFlee.pos);
+                flee.mult(this.priorityFlee);
+                this.applyForce(flee);
+            }
         }
 
         // Seeking
-        let toSeek = this.getNearest(arr, this.toSeek);
-        if (toSeek) {
-            let seek = this.seek(toSeek.pos);
-            seek.mult(this.prioritySeek);
-            this.applyForce(seek);
+        if (this.prioritySeek > 0 && this.toSeek.length > 0) {
+            let toSeek = this.getNearest(arr, this.toSeek);
+            if (toSeek) {
+                let seek = this.seek(toSeek.pos);
+                seek.mult(this.prioritySeek);
+                this.applyForce(seek);
+            }
         }
 
         // Separation
-        let toSeparate = getByType(arr, this.toSeparate);
-        let separate = this.separate(toSeparate);
-        separate.mult(this.prioritySeparate);
-        this.applyForce(separate);
+        if (this.prioritySeparation > 0 && this.toSeparate.length > 0) {
+            let toSeparate = getByType(arr, this.toSeparate);
+            let separate = this.separate(toSeparate);
+            separate.mult(this.prioritySeparate);
+            this.applyForce(separate);
+        }
     }
 
     // Update physics and hunger
