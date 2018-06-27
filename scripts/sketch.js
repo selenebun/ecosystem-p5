@@ -11,8 +11,13 @@ let presets = [
 ];
 let selectedPreset = 0;
 
+let dispGraph = true;
 let paused = false;
 let selected = 'prey';
+
+let hist;
+let maxHist;
+let maxPopulation = 0;
 
 
 function setup() {
@@ -27,10 +32,16 @@ function setup() {
 
     // Spawn entities
     reset();
+
+    // Set maximum history based on canvas size
+    maxHist = ceil(width / 4);
 }
 
 function draw() {
     background(0);
+
+    // Update history with current population values
+    updateHistory();
 
     // Spawn food
     if (!paused && !toLimitEntities() && random() < 0.5) {
@@ -54,6 +65,9 @@ function draw() {
         entities = entities.concat(newEntities);
         newEntities = [];
     }
+
+    // Display population history
+    if (dispGraph) lineGraph();
 }
 
 function keyPressed() {
@@ -67,6 +81,9 @@ function keyPressed() {
 
     // Toggle pause state
     if (key === ' ') paused = !paused;
+
+    // Toggle graph
+    if (key === 'G') dispGraph = !dispGraph;
 
     // Reset simulation
     if (key === 'R') reset();
@@ -86,9 +103,65 @@ function mousePressed() {
 }
 
 
+// Count each type of entity
+function countTypes(arr) {
+    let types = {};
+
+    // Add all types
+    let keys = Object.keys(ENTITY);
+    for (let i = 0; i < keys.length; i++) {
+        types[keys[i]] = 0;
+    }
+
+    // Count each entity
+    for (let i = 0; i < arr.length; i++) {
+        types[arr[i].type]++;
+    }
+
+    // Update maximum entity count
+    if (entities.length > maxPopulation) maxPopulation = entities.length;
+
+    return types;
+}
+
+// Draw a line graph of each entity type population
+function lineGraph() {
+    // Transparent rect behind graph
+    fill(0, 127);
+    noStroke();
+    rect(0, 25, hist.length, 150);
+
+    // Plot the history of each type
+    let types = Object.keys(hist[0]);
+    noFill();
+    strokeWeight(2);
+    for (let i = 0; i < types.length; i++) {
+        let type = types[i];
+
+        stroke(ENTITY[type].color);
+        beginShape();
+        for (let x = 0; x < hist.length; x++) {
+            let y = map(hist[x][type], 0, maxPopulation, 175, 25);
+            vertex(x, y);
+        }
+        endShape();
+    }
+    strokeWeight(1);
+
+    // Draw line at current draw location
+    stroke(204);
+    line(hist.length, 25, hist.length, 175);
+}
+
 // Return whether entity count is high enough to begin slowdown
 function toLimitEntities() {
     return entities.length + newEntities.length >= 600;
+}
+
+// Update history based on entities
+function updateHistory() {
+    hist.push(countTypes(entities));
+    if (hist.length > maxHist) hist.shift();
 }
 
 // Reset entities
@@ -106,6 +179,9 @@ function reset() {
             spawnEntity(random(width), random(height), template);
         }
     }
+
+    // Reset the history
+    hist = [];
 }
 
 // Spawn entity at position
