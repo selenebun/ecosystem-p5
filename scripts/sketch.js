@@ -40,12 +40,14 @@ function setup() {
 function draw() {
     background(0);
 
-    // Update history with current population values
-    updateHistory();
+    if (!paused) {
+        // Update history with current population values
+        updateHistory();
 
-    // Spawn food
-    if (!paused && !toLimitEntities() && random() < 0.5) {
-        spawnEntity(random(width), random(height), 'food');
+        // Spawn food
+        if (!toLimitEntities() && random() < 0.5) {
+            spawnEntity(random(width), random(height), 'food');
+        }
     }
 
     // Update and display all entities
