@@ -33,7 +33,7 @@ ENTITY.prey = {
     // Physics
     maxForce: 0.2,
     maxSpeed: 3,
-    r: 8
+    r: 47
 };
 
 ENTITY.predator = {
