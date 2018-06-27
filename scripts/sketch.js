@@ -34,7 +34,7 @@ function setup() {
     reset();
 
     // Set maximum history based on canvas size
-    maxHist = ceil(width / 4);
+    maxHist = ceil(width / 3);
 }
 
 function draw() {
