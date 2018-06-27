@@ -1,20 +1,14 @@
 class Entity {
     constructor(x, y) {
         // AI
+        this.multipleAvoid = true;
+        this.multiplePursue = false;
         this.perception = 75;
-        this.priorityArrive = 1;
-        this.priorityCohesion = 1;
-        this.priorityFlee = 1;
-        this.prioritySeek = 1;
-        this.prioritySeparation = 1;
-        this.rangeCohesion = 50;
-        this.rangeSeparation = 25;
-        this.toArrive = [];
-        this.toCohere = [];
+        this.priorityAvoid = 1;
+        this.priorityPursue = 1;
+        this.toAvoid = [];
         this.toEat = [];
-        this.toFlee = [];
-        this.toSeek = [];
-        this.toSeparate = [];
+        this.toPursue = [];
 
         // Display
         this.color = '#ECF0F1';
@@ -25,7 +19,7 @@ class Entity {
         this.childrenBase = 1;
         this.childrenExtra = 0;
         this.dead = false;
-        this.hunger = 200;
+        this.hunger = 50;
         this.type = 'entity';
 
         // Physics
@@ -63,20 +57,6 @@ class Entity {
         this.acc.add(f);
     }
 
-    // Slow down in order to arrive at a target vector
-    arrive(v) {
-        let desired = p5.Vector.sub(v, this.pos);
-        let d = desired.mag();
-
-        // Slow down if nearby target
-        if (d < 100) {
-            let speed = map(d, 0, 100, 0, this.maxSpeed);
-            return this.adjust(desired, speed);
-        } else {
-            return this.adjust(desired);
-        }
-    }
-
     // Attempt to eat
     attemptEat(arr) {
         for (let i = 0; i < arr.length; i++) {
@@ -112,32 +92,6 @@ class Entity {
         this.applyForce(this.adjust(desired));
     }
 
-    // Steer towards nearby entities
-    cohere(arr) {
-        let desired = createVector();
-
-        // Account for all nearby entities
-        let count = 0;
-        for (let i = 0; i < arr.length; i++) {
-            let e = arr[i];
-            let d = e.pos.dist(this.pos);
-
-            // Check if within cohesion range
-            if (d < this.rangeCohesion) {
-                desired.add(e.pos);
-                count++;
-            }
-        }
-
-        // Average
-        if (count > 0) {
-            desired.div(count);
-            desired = this.seek(desired);
-        }
-
-        return desired;
-    }
-
     // Display entity
     display() {
         let alpha = this.hunger / this.maxHunger * 215 + 40;
@@ -171,7 +125,7 @@ class Entity {
             // Skip self
             if (e === this) continue;
 
-            // Check if valid type
+            // Check if invalid type
             if (types.indexOf(e.type) === -1) continue;
 
             // Do not consider entities beyond perception range
@@ -218,7 +172,7 @@ class Entity {
         this.maxHunger = this.hunger;
 
         // All types that the entity reacts to
-        this.rTypes = uniq(this.toArrive.concat(this.toCohere, this.toEat, this.toFlee, this.toSeek, this.toSeparate));
+        this.rTypes = uniq(this.toAvoid.concat(this.toEat, this.toPursue));
 
         // Wander angle
         this.wanderTheta = this.vel.heading();
@@ -252,34 +206,6 @@ class Entity {
         return this.adjust(desired);
     }
 
-    // Maintain a minimum distance from nearby entities
-    separate(arr) {
-        let desired = createVector();
-
-        // Account for all nearby entities
-        let count = 0;
-        for (let i = 0; i < arr.length; i++) {
-            let e = arr[i];
-            let d = e.pos.dist(this.pos);
-
-            // Check if within separation range
-            if (d < this.rangeSeparation) {
-                let diff = p5.Vector.sub(this.pos, e.pos);
-                diff.setMag(1 / d);
-                desired.add(diff);
-                count++;
-            }
-        }
-
-        // Average
-        if (count > 0) desired.div(count);
-
-        // If desired velocity is nonzero
-        if (desired.magSq() > 0) desired = this.adjust(desired);
-
-        return desired;
-    }
-
     // Spawn a new child entity, apply mutations
     spawnChild() {
         let e = new Entity(this.pos.x, this.pos.y);
@@ -293,14 +219,11 @@ class Entity {
         c.setBlue(mutate(levels[2], 10));
         e.color = c;
 
+        if (random() < 0.05) e.multipleAvoid = !this.multipleAvoid;
+        if (random() < 0.05) e.multiplePursue = !this.multiplePursue;
         e.perception = mutate(this.perception, 10);
-        e.priorityArrive = mutate(this.priortiyArrive, 0.1);
-        e.priorityCohesion = mutate(this.priorityCohesion, 0.1);
-        e.priorityFlee = mutate(this.priorityFlee, 0.1);
-        e.prioritySeek = mutate(this.prioritySeek, 0.1);
-        e.prioritySeparate = mutate(this.prioritySeparate, 0.1);
-        e.rangeCohesion = mutate(this.rangeCohesion, 10);
-        e.rangeSeparation = mutate(this.rangeSeparation, 10);
+        e.priorityAvoid = mutate(this.priorityAvoid, 0.1);
+        e.priorityPursue = mutate(this.priorityPursue, 0.1);
 
         e.childrenBase = mutate(this.childrenBase, 0.1);
         e.childrenExtra = mutate(this.childrenExtra, 0.1);
@@ -322,50 +245,58 @@ class Entity {
             return;
         }
 
-        // Arriving
-        if (this.priorityArrive > 0 && this.toArrive.length > 0) {
-            let toArrive = this.getNearest(arr, this.toArrive);
-            if (toArrive) {
-                let arrive = this.arrive(toArrive.pos);
-                arrive.mult(this.priorityArrive);
-                this.applyForce(arrive);
+        // Avoidance
+        if (this.priorityAvoid > 0 || this.toAvoid.length > 0) {
+            let toAvoid = getByType(arr, this.toAvoid);
+            if (toAvoid.length > 0) {
+                let avoidVector;
+                if (this.multipleAvoid) {
+                    avoidVector = createVector();
+                    for (let i = 0; i < toAvoid.length; i++) {
+                        let e = toAvoid[i];
+                        let d = e.pos.dist(this.pos);
+                        let diff = p5.Vector.sub(this.pos, e.pos);
+                        diff.setMag(1 / d);
+                        avoidVector.add(diff);
+                    }
+                    avoidVector.div(toAvoid.length);
+                } else {
+                    let e = this.getNearest(toAvoid, this.toAvoid);
+                    avoidVector = p5.Vector.sub(this.pos, e.pos);
+                }
+
+                // Apply avoidance steering
+                avoidVector = this.adjust(avoidVector);
+                avoidVector.mult(this.priorityAvoid);
+                this.applyForce(avoidVector);
             }
         }
 
-        // Cohesion
-        if (this.priorityCohesion > 0 && this.toCohere.length > 0) {
-            let toCohere = getByType(arr, this.toCohere);
-            let cohesion = this.cohere(toCohere);
-            cohesion.mult(this.priorityCohesion);
-            this.applyForce(cohesion);
-        }
+        // Pursuit
+        if (this.priorityPursue > 0 || this.toPursue.length > 0) {
+            let toPursue = getByType(arr, this.toPursue);
+            if (toPursue.length > 0) {
+                let pursuitVector;
+                if (this.multiplePursue) {
+                    pursuitVector = createVector();
+                    for (let i = 0; i < toPursue.length; i++) {
+                        let e = toPursue[i];
+                        let d = e.pos.dist(this.pos);
+                        let diff = p5.Vector.sub(e.pos, this.pos);
+                        diff.setMag(1 / d);
+                        pursuitVector.add(diff);
+                    }
+                    pursuitVector.div(toPursue.length);
+                } else {
+                    let e = this.getNearest(toPursue, this.toPursue);
+                    pursuitVector = p5.Vector.sub(e.pos, this.pos);
+                }
 
-        // Fleeing
-        if (this.priorityFlee > 0 && this.toFlee.length > 0) {
-            let toFlee = this.getNearest(arr, this.toFlee);
-            if (toFlee) {
-                let flee = this.flee(toFlee.pos);
-                flee.mult(this.priorityFlee);
-                this.applyForce(flee);
+                // Apply avoidance steering
+                pursuitVector = this.adjust(pursuitVector);
+                pursuitVector.mult(this.priorityPursue);
+                this.applyForce(pursuitVector);
             }
-        }
-
-        // Seeking
-        if (this.prioritySeek > 0 && this.toSeek.length > 0) {
-            let toSeek = this.getNearest(arr, this.toSeek);
-            if (toSeek) {
-                let seek = this.seek(toSeek.pos);
-                seek.mult(this.prioritySeek);
-                this.applyForce(seek);
-            }
-        }
-
-        // Separation
-        if (this.prioritySeparation > 0 && this.toSeparate.length > 0) {
-            let toSeparate = getByType(arr, this.toSeparate);
-            let separate = this.separate(toSeparate);
-            separate.mult(this.prioritySeparate);
-            this.applyForce(separate);
         }
     }
 

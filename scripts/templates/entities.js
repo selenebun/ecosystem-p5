@@ -16,17 +16,20 @@ ENTITY.food = {
 
 ENTITY.prey = {
     // AI
-    priorityFlee: 0.2,
+    priorityAvoid: 0.2,
     toEat: ['food'],
-    toFlee: ['predator'],
-    toSeek: ['food'],
+    toAvoid: ['predator'],
+    toPursue: ['food'],
     // Display
     color: '#22A7F0',
     model: MODEL.filledCircle,
     // Misc
     childrenExtra: 1,
+    hunger: 200,
     type: 'prey',
     // Physics
+    maxForce: 0.2,
+    maxSpeed: 3,
     r: 8,
     // Methods
     onEat: function() {
@@ -36,11 +39,12 @@ ENTITY.prey = {
 
 ENTITY.predator = {
     // AI
+    multiplePursue: true,
     perception: 150,
-    priorityFlee: 0,
+    priorityAvoid: 0.125,
+    toAvoid: ['predator'],
     toEat: ['prey'],
-    toFlee: ['predator'],
-    toSeek: ['prey'],
+    toPursue: ['prey'],
     // Display
     color: '#D73C2C',
     model: MODEL.pointy,
