@@ -6,9 +6,12 @@ let presets = [
         food: 30,
         prey: 20,
         predator: 10
-    }
+    },
+    {}
 ];
 let selectedPreset = 0;
+
+let selected = 'prey';
 
 
 function setup() {
@@ -29,7 +32,9 @@ function draw() {
     background(0);
 
     // Spawn food
-    if (!toLimitEntities()) spawnFood(0.2);
+    if (!toLimitEntities() && random() < 0.2) {
+        spawnEntity(random(width), random(height), 'food');
+    }
 
     // Update and display all entities
     for (let i = entities.length - 1; i >= 0; i--) {
@@ -59,6 +64,19 @@ function keyPressed() {
 
     // Reset simulation
     if (key === 'R') reset();
+
+    // Entity selection
+    if (key === 'F') selected = 'food';
+    if (key === 'P') selected = 'prey';
+    if (key === 'B') selected = 'predator';
+}
+
+function mouseDragged() {
+    spawnEntity(mouseX, mouseY, selected);
+}
+
+function mousePressed() {
+    spawnEntity(mouseX, mouseY, selected);
 }
 
 
@@ -79,20 +97,15 @@ function reset() {
         let template = keys[i];
         let count = preset[template];
         for (let j = 0; j < count; j++) {
-            let e = new Entity(random(width), random(height));
-            applyTemplate(e, ENTITY[template]);
-            e.init();
-            entities.push(e);
+            spawnEntity(random(width), random(height), template);
         }
     }
 }
 
-// Spawn food on screen
-function spawnFood(chance) {
-    if (random() < chance) {
-        let e = new Entity(random(width), random(height));
-        applyTemplate(e, ENTITY.food);
-        e.init();
-        newEntities.push(e);
-    }
+// Spawn entity at position
+function spawnEntity(x, y, type) {
+    let e = new Entity(x, y);
+    applyTemplate(e, ENTITY[type]);
+    e.init();
+    newEntities.push(e);
 }

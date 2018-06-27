@@ -144,13 +144,6 @@ class Entity {
         this.color.setAlpha(alpha);
         this.model(alpha);
 
-        // Display perception range
-        if (keyIsDown(80)) {
-            noFill();
-            stroke('#39D5FF');
-            ellipse(this.pos.x, this.pos.y, this.perception, this.perception);
-        }
-
         // Display hitbox
         if (keyIsDown(72)) {
             fill(255, 63);
@@ -229,6 +222,8 @@ class Entity {
 
         // Wander angle
         this.wanderTheta = this.vel.heading();
+
+        this.vel = p5.Vector.random2D().mult(this.maxSpeed);
     }
 
     // Events

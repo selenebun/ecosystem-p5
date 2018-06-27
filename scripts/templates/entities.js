@@ -52,10 +52,7 @@ ENTITY.predator = {
     // Methods
     onDeath: function() {
         if (random() < 0.5) return;
-        let e = new Entity(this.pos.x, this.pos.y);
-        applyTemplate(e, ENTITY.food);
-        e.init();
-        newEntities.push(e);
+        spawnEntity(this.pos.x, this.pos.y, 'food');
     },
     onEat: function() {
         this.reproduce();
