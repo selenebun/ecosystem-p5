@@ -29,7 +29,7 @@ function draw() {
     background(0);
 
     // Spawn food
-    spawnFood(0.2);
+    if (!toLimitEntities()) spawnFood(0.2);
 
     // Update and display all entities
     for (let i = entities.length - 1; i >= 0; i--) {
@@ -61,6 +61,11 @@ function keyPressed() {
     if (key === 'R') reset();
 }
 
+
+// Return whether entity count is high enough to begin slowdown
+function toLimitEntities() {
+    return entities.length + newEntities.length > 600;
+}
 
 // Reset entities
 function reset() {

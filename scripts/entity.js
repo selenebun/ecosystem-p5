@@ -239,7 +239,7 @@ class Entity {
     reproduce() {
         // Determine number of children to spawn
         let count = round(this.childrenBase);
-        if (entities.length + newEntities.length < 600) {
+        if (!toLimitEntities()) {
             for (let i = 0; i < round(this.childrenExtra); i++) {
                 if (random() < 0.5) count++;
             }
