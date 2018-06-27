@@ -37,7 +37,9 @@ ENTITY.prey = {
 ENTITY.predator = {
     // AI
     perception: 150,
+    priorityFlee: 0,
     toEat: ['prey'],
+    toFlee: ['predator'],
     toSeek: ['prey'],
     // Display
     color: '#D73C2C',
