@@ -68,14 +68,25 @@ class Entity {
             if (this.toEat.indexOf(e.type) === -1) continue;
 
             // Eat if inside entity
-            if (!e.dead && pointCircle(e.pos, this.pos, this.r)) {
-                e.dead = true;
+            if (!e.dead) {
+                let canEat;
+                if (eatMode === 0) {
+                    canEat = pointCircle(e.pos, this.pos, this.r);
+                } else if (eatMode === 1) {
+                    canEat = circleCircle(e.pos, e.r, this.pos, this.r);
+                } else {
+                    canEat = pointCircle(this.pos, e.pos, e.r);
+                }
 
-                // Refill hunger
-                this.hunger = this.maxHunger;
+                if (canEat) {
+                    e.dead = true;
 
-                // Trigger onEat event
-                this.onEat();
+                    // Refill hunger
+                    this.hunger = this.maxHunger;
+
+                    // Trigger onEat event
+                    this.onEat();
+                }
             }
         }
     }

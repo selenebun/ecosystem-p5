@@ -19,6 +19,8 @@ let hist;
 let maxHist;
 let maxPopulation = 0;
 
+let eatMode = 0;
+
 
 function setup() {
     // Set up canvas
@@ -83,6 +85,14 @@ function keyPressed() {
 
     // Toggle pause state
     if (key === ' ') paused = !paused;
+
+    // Cycle between eating modes
+    if (key === 'E') {
+        eatMode++;
+        if (eatMode > 2) eatMode = 0;
+
+        document.getElementById('eatMode').innerHTML = 'Eat mode: ' + eatMode;
+    }
 
     // Toggle graph
     if (key === 'G') dispGraph = !dispGraph;
