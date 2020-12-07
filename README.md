@@ -1,5 +1,6 @@
 # ecosystem
-An ecosystem and evolution simulation in HTML5 and JS. You can run it [here](https://xithiox.github.io/ecosystem/).
+An ecosystem and evolution simulation in HTML5 and JS. You can run it
+[here](https://rsaihe.github.io/ecosystem/).
 
 
 ### Controls
@@ -10,7 +11,8 @@ An ecosystem and evolution simulation in HTML5 and JS. You can run it [here](htt
 * R to reset the simulation.
 
 ### Creature types:
-Press one of the below keys in order to select a type of creature, and then spawn by clicking with the mouse.
+Press one of the below keys in order to select a type of creature, and then
+spawn by clicking with the mouse.
 * F: food
 * B: prey
 * P: predator
